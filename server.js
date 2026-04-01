@@ -43,12 +43,12 @@ io.on('connection', (socket) => {
 
         tiktokLive.connect()
             .then(() => {
-                console.log(`✅ Conectado al LIVE de ${username}`);
-                socket.emit('estado', { ok: true, mensaje: ` Conectado a @${username}` });
+                console.log(`Conectado al LIVE de ${username}`);
+                socket.emit('estado', { ok: true, mensaje: `Conectado a @${username}` });
             })
             .catch(err => {
-                console.error("❌ Error:", err.message);
-                socket.emit('estado', { ok: false, mensaje: `❌ ${err.message}` });
+                console.error("Error:", err.message);
+                socket.emit('estado', { ok: false, mensaje: `No se pudo conectar a @${username}` });
             });
 
         // 💬 Comentarios
