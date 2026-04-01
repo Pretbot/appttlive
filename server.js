@@ -44,7 +44,7 @@ io.on('connection', (socket) => {
         tiktokLive.connect()
             .then(() => {
                 console.log(`✅ Conectado al LIVE de ${username}`);
-                socket.emit('estado', { ok: true, mensaje: `✅ Conectado a @${username}` });
+                socket.emit('estado', { ok: true, mensaje: ` Conectado a @${username}` });
             })
             .catch(err => {
                 console.error("❌ Error:", err.message);
