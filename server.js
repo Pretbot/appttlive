@@ -91,6 +91,13 @@ io.on('connection', (socket) => {
                 user: data.nickname
             });
         });
+
+        // 🔁 Compartir
+        tiktokLive.on('share', data => {
+            socket.emit('share', {
+                user: data.nickname
+            });
+        });
     });
 
     socket.on('disconnect', () => {
