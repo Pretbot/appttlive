@@ -46,7 +46,17 @@ async function guardarApodos(apodos) {
 }
 
 // ── Telegram Bot ──────────────────────────────────────────────────────────────
-const bot = new TelegramBot(TELEGRAM_TOKEN, { polling: true });
+const bot = new TelegramBot(TELEGRAM_TOKEN, { 
+    polling: {
+        autoStart: true,
+        params: {
+            timeout: 10
+        }
+    }
+});
+
+process.once('SIGINT',  () => bot.stopPolling());
+process.once('SIGTERM', () => bot.stopPolling());
 
 function notificarTelegram(texto) {
     bot.sendMessage(TELEGRAM_CHAT_ID, texto).catch(() => {});
