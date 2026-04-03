@@ -13,7 +13,7 @@ const io     = new Server(server, {
 
 app.use(express.json());
 
-// ── Config ────────────────────────────────────────────────────────────────────
+// ── Config (valores en Railway → Variables) ───────────────────────────────────
 const TELEGRAM_TOKEN   = process.env.TELEGRAM_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 const JSONBIN_KEY      = process.env.JSONBIN_KEY;
@@ -26,7 +26,7 @@ async function cargarApodos() {
             headers: { 'X-Master-Key': JSONBIN_KEY }
         });
         const data = await res.json();
-        return data.record || {};
+        return data.record.apodos || {};
     } catch (e) { return {}; }
 }
 
@@ -38,7 +38,7 @@ async function guardarApodos(apodos) {
                 'Content-Type': 'application/json',
                 'X-Master-Key': JSONBIN_KEY
             },
-            body: JSON.stringify(apodos)
+            body: JSON.stringify({ apodos })
         });
     } catch (e) {
         console.error('Error guardando apodos:', e.message);
@@ -78,7 +78,9 @@ bot.onText(/\/apodo (.+)/, async (msg, match) => {
     if (msg.chat.id.toString() !== TELEGRAM_CHAT_ID) return;
     const partes  = match[1].trim().split(' ');
     if (partes.length < 2) {
-        bot.sendMessage(msg.chat.id, '❌ Uso: /apodo usuario_tiktok Apodo\nEjemplo: /apodo ⚡_Ryan_⚡ Ryan');
+        bot.sendMessage(msg.chat.id,
+            '❌ Uso correcto:\n/apodo usuario_tiktok Apodo\n\nEjemplo:\n/apodo ⚡_Ryan_⚡ Ryan'
+        );
         return;
     }
     const usuario = partes[0];
@@ -151,7 +153,7 @@ io.on('connection', async (socket) => {
             })
             .catch(err => {
                 socket.emit('estado', { ok: false, mensaje: `Error: ${err.message}` });
-                notificarTelegram(`🔴 Error: ${err.message}`);
+                notificarTelegram(`🔴 Error al conectar: ${err.message}`);
             });
 
         tiktokLive.on('chat', async data => {
@@ -163,8 +165,9 @@ io.on('connection', async (socket) => {
             if (data.giftType === 1 && !data.repeatEnd) return;
             usuariosVistos.add(data.nickname);
             socket.emit('gift', {
-                user: data.nickname, gift: data.giftName,
-                cantidad: data.repeatCount || 1,
+                user:      data.nickname,
+                gift:      data.giftName,
+                cantidad:  data.repeatCount  || 1,
                 diamantes: data.diamondCount || 0
             });
             notificarTelegram(
@@ -188,14 +191,24 @@ io.on('connection', async (socket) => {
             socket.emit('subscribe', { user: data.nickname });
             notificarTelegram(`🔔 Suscripción: ${data.nickname}`);
         });
+
+        tiktokLive.on('share', data => {
+            usuariosVistos.add(data.nickname);
+            socket.emit('share', { user: data.nickname });
+            notificarTelegram(`🔗 Compartido por: ${data.nickname}`);
+        });
     });
 
     socket.on('disconnect', () => {
         if (tiktokLive) { tiktokLive.disconnect(); tiktokLive = null; }
+        notificarTelegram('🔴 App desconectada del servidor');
     });
 });
 
 app.get("/", (req, res) => res.send("TTLIVE Server 🔥"));
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`🚀 Puerto ${PORT}`));
+server.listen(PORT, () => {
+    console.log(`🚀 Servidor en puerto ${PORT}`);
+    console.log(`🤖 Bot de Telegram activo`);
+});
