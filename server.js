@@ -13,13 +13,13 @@ const io     = new Server(server, {
 
 app.use(express.json());
 
-// ── Config (valores en Railway → Variables) ───────────────────────────────────
+// ── Config ────────────────────────────────────────────────────────────────────
 const TELEGRAM_TOKEN   = process.env.TELEGRAM_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 const JSONBIN_KEY      = process.env.JSONBIN_KEY;
 const JSONBIN_BIN      = process.env.JSONBIN_BIN;
 
-// ── JSONBin — apodos persistentes ─────────────────────────────────────────────
+// ── JSONBin ───────────────────────────────────────────────────────────────────
 async function cargarApodos() {
     try {
         const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN}/latest`, {
@@ -46,17 +46,16 @@ async function guardarApodos(apodos) {
 }
 
 // ── Telegram Bot ──────────────────────────────────────────────────────────────
-const bot = new TelegramBot(TELEGRAM_TOKEN, { 
+const bot = new TelegramBot(TELEGRAM_TOKEN, {
     polling: {
         autoStart: true,
-        params: {
-            timeout: 10
-        }
+        params: { timeout: 10 }
     }
 });
 
-process.once('SIGINT',  () => bot.stopPolling());
-process.once('SIGTERM', () => bot.stopPolling());
+// Detener polling limpiamente al cerrar
+process.once('SIGINT',  () => { bot.stopPolling(); process.exit(0); });
+process.once('SIGTERM', () => { bot.stopPolling(); process.exit(0); });
 
 function notificarTelegram(texto) {
     bot.sendMessage(TELEGRAM_CHAT_ID, texto).catch(() => {});
