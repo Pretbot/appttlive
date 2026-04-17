@@ -1,11 +1,11 @@
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const { WebcastPushConnection } = require('tiktok-live-connector');
+//const express = require('express');
+//const http = require('http');
+//const { Server } = require('socket.io');
+//const { WebcastPushConnection } = require('tiktok-live-connector');
 
-const app = express();
-const server = http.createServer(app);
-const io = new Server(server, {
+//const app = express();
+//const server = http.createServer(app);
+//const io = new Server(server, {
     cors: {
         origin: "*",
         methods: ["GET", "POST"]
