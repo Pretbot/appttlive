@@ -1,6 +1,6 @@
 const express = require('express');
 const http = require('http');
-const { Server } = require('socket.io');
+const { Server } = require('socket.io')
 const { WebcastPushConnection } = require('tiktok-live-connector');
 
 const app = express();
